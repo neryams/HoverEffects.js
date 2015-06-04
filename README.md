@@ -24,7 +24,7 @@
 ## Animations
 *   `erase`: **An eraser effect painting over the image to make it opaque from being transparent**
   
-        `erase(initial opacity, brush radius, margin size, line distance, randomness, duration)`
+        erase(initial opacity, brush radius, margin size, line distance, randomness, duration)
 
 	* initial opacity:  Value from 0-1, where 1 is fully opaque and 0 is transparent
 	* brush radius:     Size of the brush painting on the image
