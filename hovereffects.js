@@ -8,13 +8,13 @@ For my beloved, Chloe Lam
 window.animate = function() {
 	var animation_methods = {
 	    erase: function(initialOpacity, brushSize, margin, spacing, randomness, duration) {
-	    	var drawing;
-
 	        var imageElement = this.node;
 			imageElement.setAttribute('style', 'opacity: ' + initialOpacity);
 
-	        var canvas = document.createElement('canvas');
-			var image = new Image();
+	    	var drawing = false,
+	        	canvas = document.createElement('canvas'),
+				image = new Image(),
+	    		baseImageData;
 
 	        var brush = {}
 			for (var x = -brushSize; x <= brushSize; x++) {
@@ -28,21 +28,23 @@ window.animate = function() {
 	        image.onload = function() {
 				canvas.width = imageElement.offsetWidth;
 				canvas.height = imageElement.offsetHeight;
+
+				var ctx = canvas.getContext("2d");
+				ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+	  			baseImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	  			var data = baseImageData.data;
+				for (var i = 0; i < data.length; i += 4) {
+					data[i + 3] = initialOpacity * 255;
+				}
+				
 				init();
+	  			imageElement.parentElement.insertBefore(canvas, imageElement);
+				imageElement.remove();
 	        };
 
 	        var init = function() {
 				var ctx = canvas.getContext("2d");
-				ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
-				imageElement.setAttribute('style', 'display: none;');
-	  			imageElement.parentElement.insertBefore(canvas, imageElement);
-
-	  			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-	  			var data = imageData.data;
-				for (var i = 0; i < data.length; i += 4) {
-					data[i + 3] = initialOpacity * 255;
-				}
-    			ctx.putImageData(imageData, 0, 0);
+    			ctx.putImageData(baseImageData, 0, 0);
 	        }
 
 	        var generatePath = function(position, path) {
