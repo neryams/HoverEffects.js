@@ -26,8 +26,8 @@ window.animate = function() {
 			}
 
 	        image.onload = function() {
-				canvas.width = imageElement.offsetWidth;
-				canvas.height = imageElement.offsetHeight;
+				canvas.width = imageElement.width;
+				canvas.height = imageElement.height;
 
 				var ctx = canvas.getContext("2d");
 				ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
@@ -36,10 +36,10 @@ window.animate = function() {
 				for (var i = 0; i < data.length; i += 4) {
 					data[i + 3] = initialOpacity * 255;
 				}
-				
+
 				init();
 	  			imageElement.parentElement.insertBefore(canvas, imageElement);
-				imageElement.remove();
+				imageElement.parentElement.removeChild(imageElement);
 	        };
 
 	        var init = function() {
@@ -168,3 +168,29 @@ window.animate = function() {
 	    return new _animate(selector);
 	};
 }();
+
+/* requestAnimationFrame polyfill by Paul Irish */
+(function() {
+    var lastTime = 0;
+    var vendors = ['webkit', 'moz'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame =
+          window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
