@@ -5,13 +5,13 @@
 1. Include the javascript file in your document's `head`
 
 		<head> 
-		  <link rel="stylesheet" href="animate.min.css">
+			<script src="hovereffects.js" type="text/javascript"></script>
 		</head>
 
 2. Insert javascript to animate the image elements you select at the bottom of your body tag.
 
 		<script>
-		var hoverElements = document.querySelectorAll('.hover_animate');
+		var hoverElements = document.querySelectorAll('img.hover_animate');
 		for (var i = 0; i < hoverElements.length; ++i) {
 		    var animation = animate(hoverElements[i]).erase(0.5, 10, 24, 0.08, 20, 10000);
 		    animation.element.addEventListener( 'mouseover', animation.beginDrawing );
