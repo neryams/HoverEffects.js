@@ -10,9 +10,11 @@ window.animate = function() {
 	    erase: function(initialOpacity, brushSize, margin, spacing, randomness, duration) {
 	    	var drawing;
 
-	        var image = this.node;
+	        var imageElement = this.node;
+			imageElement.setAttribute('style', 'opacity: ' + initialOpacity);
+
 	        var canvas = document.createElement('canvas');
-	        var realWidth, realHeight;
+			var image = new Image();
 
 	        var brush = {}
 			for (var x = -brushSize; x <= brushSize; x++) {
@@ -24,21 +26,16 @@ window.animate = function() {
 			}
 
 	        image.onload = function() {
-			    var t = new Image();
-			    t.src = (image.getAttribute ? image.getAttribute("src") : false) || image.src;
-			    realWidth = t.width;
-			    realHeight = t.height;
-
-				canvas.width = image.offsetWidth;
-				canvas.height = image.offsetHeight;
+				canvas.width = imageElement.offsetWidth;
+				canvas.height = imageElement.offsetHeight;
 				init();
 	        };
 
 	        var init = function() {
 				var ctx = canvas.getContext("2d");
-				ctx.drawImage(image, 0, 0, realWidth, realHeight, 0, 0, canvas.width, canvas.height);
-				image.setAttribute('style', 'display: none;');
-	  			image.parentElement.insertBefore(canvas, image);
+				ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
+				imageElement.setAttribute('style', 'display: none;');
+	  			imageElement.parentElement.insertBefore(canvas, imageElement);
 
 	  			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	  			var data = imageData.data;
@@ -144,6 +141,8 @@ window.animate = function() {
 	        	drawing = false;
 				init();
 	        }
+			
+			image.src = (imageElement.getAttribute ? imageElement.getAttribute("src") : false) || imageElement.src;
 
 	        return {
 	        	element: canvas,
