@@ -99,7 +99,7 @@ window.animate = function() {
 				var ctx = canvas.getContext("2d");
 	  			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
 	  				position = {x: margin, y: margin},
-	  				step = 1,
+	  				frame = 1,
 	  				stepsPerFrame = 0,
 	  				fps = 60;
 
@@ -108,7 +108,7 @@ window.animate = function() {
 	  			// Get number of movements to break up the animation evenly for the duration
 	  			var path = generatePath(position, []);
 	        	var i = 0,
-	        		stepsPerFrame = Math.ceil(path.length / (duration / fps));
+	        		stepsPerFrame = path.length / (duration * (fps / 1000));
 
 	        	drawing = true;
 	        	var draw = function(timestamp) {
@@ -117,7 +117,7 @@ window.animate = function() {
 		        			drawing = false;
 		        		}
 		        		else {
-		        			while(i < step * stepsPerFrame && i < path.length) {
+		        			while(i < frame * stepsPerFrame && i < path.length) {
 			        			for (var x = -brushSize; x <= brushSize; x++) {
 									for (var y = -brushSize; y <= brushSize; y++) {
 										var yPos = path[i].y + y,
@@ -133,7 +133,7 @@ window.animate = function() {
 		        			}
 			    			ctx.putImageData(imageData, 0, 0);
 
-		    				step++;
+		    				frame++;
 		        		}
 	        			window.requestAnimationFrame(draw);
 	        		}
