@@ -8,10 +8,11 @@
 			<script src="hovereffects.js" type="text/javascript"></script>
 		</head>
 
-2. Insert javascript to animate the image elements you select at the bottom of your body tag.
+2. Insert javascript at the bottom of your body tag that selects the image tags you wish to animate.
 
 		<script>
 		var hoverElements = document.querySelectorAll('img.hover_animate');
+
 		for (var i = 0; i < hoverElements.length; ++i) {
 		    var animation = animate(hoverElements[i]).erase(0.5, 10, 24, 0.08, 20, 10000);
 		    animation.element.addEventListener( 'mouseover', animation.beginDrawing );
@@ -19,7 +20,7 @@
 		}
 		</script>
 
-3. Invoke the animation plugin with the function `animate(elements)`. You can then attatch one of the animations available:
+3. Invoke the animation plugin with the function `animate(element)`. You can then attatch one of the animations available:
 
 ## Animations
 *   `erase`: **An eraser effect painting over the image to make it opaque from being transparent**
