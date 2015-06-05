@@ -9,7 +9,6 @@ window.animate = function() {
 	var animation_methods = {
 	    erase: function(initialOpacity, brushSize, margin, spacing, randomness, duration) {
 	        var imageElement = this.node;
-			imageElement.setAttribute('style', 'opacity: ' + initialOpacity);
 
 	    	var drawing = false,
 	        	canvas = document.createElement('canvas'),
