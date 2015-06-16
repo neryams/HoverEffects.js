@@ -7,8 +7,19 @@ For my beloved, Chloe Lam
 
 window.animate = function() {
 	var animation_methods = {
-	    erase: function(initialOpacity, brushSize, margin, spacing, randomness, duration) {
-	        var imageElement = this.node;
+	    erase: function(options) {
+	    	var defaultOptions = {
+		    		initialOpacity: 0.5,
+		    		brushSize: 10, 
+		    		margin: 24,
+		    		spacing: 1,
+		    		randomness: 0,
+		    		duration: 3000
+		    	},
+	    		spacingMult = 0.08,
+	        	imageElement = this.node;
+	        	
+	        options = merge(defaultOptions, options || {});
 
 	    	var drawing = false,
 	        	canvas = document.createElement('canvas'),
@@ -16,11 +27,11 @@ window.animate = function() {
 	    		baseImageData;
 
 	        var brush = {}
-			for (var x = -brushSize; x <= brushSize; x++) {
+			for (var x = -options.brushSize; x <= options.brushSize; x++) {
 				brush[x] = {};
-				for (var y = -brushSize; y <= brushSize; y++) {
-					//brush[x][y] = 255 * initialOpacity + 255 * (1 - initialOpacity) * (1 - Math.sqrt(x*x+y*y) / brushSize);
-					brush[x][y] = 255 * (1 - initialOpacity) * (Math.sqrt(x*x+y*y) / brushSize) * (0.70/brushSize);
+				for (var y = -options.brushSize; y <= options.brushSize; y++) {
+					//brush[x][y] = 255 * options.initialOpacity + 255 * (1 - options.initialOpacity) * (1 - Math.sqrt(x*x+y*y) / options.brushSize);
+					brush[x][y] = 255 * (1 - options.initialOpacity) * (Math.sqrt(x*x+y*y) / options.brushSize) * (0.70/options.brushSize);
 				}
 			}
 
@@ -33,7 +44,7 @@ window.animate = function() {
 	  			baseImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	  			var data = baseImageData.data;
 				for (var i = 0; i < data.length; i += 4) {
-					data[i + 3] = initialOpacity * 255;
+					data[i + 3] = options.initialOpacity * 255;
 				}
 
 				init();
@@ -54,23 +65,23 @@ window.animate = function() {
 	        		flips = 0,
 	        		h = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
 	        		
-	        	while(position.x > margin - randomness - 1 && position.x - canvas.width < margin + randomness + 1 &&
-	        			position.y > margin - randomness - 1 && position.y - canvas.height < margin + randomness + 1) {
+	        	while(position.x > options.margin - options.randomness - 1 && position.x - canvas.width < options.margin + options.randomness + 1 &&
+	        			position.y > options.margin - options.randomness - 1 && position.y - canvas.height < options.margin + options.randomness + 1) {
 	        		if(flips >= 2) {
 	        			break;
 	        		}
 		        	position.x += xDiff;
 		        	position.y += yDiff;
 
-		        	if((position.x - margin      + Math.random() * randomness < 0 && xDiff < 0) || 
-		        			(position.y - margin + Math.random() * randomness < 0 && yDiff < 0) || 
-		        			(position.x + margin - Math.random() * randomness > canvas.width && xDiff > 0) || 
-		        			(position.y + margin - Math.random() * randomness > canvas.height && yDiff > 0)) {
+		        	if((position.x - options.margin      + Math.random() * options.randomness < 0 && xDiff < 0) || 
+		        			(position.y - options.margin + Math.random() * options.randomness < 0 && yDiff < 0) || 
+		        			(position.x + options.margin - Math.random() * options.randomness > canvas.width && xDiff > 0) || 
+		        			(position.y + options.margin - Math.random() * options.randomness > canvas.height && yDiff > 0)) {
 		        		if(angle > 0) {
-		        			angle -= Math.PI * (1 - spacing + spacing * ((pathLength + margin + randomness * 5 * Math.random()) / (h + randomness * 5)));
+		        			angle -= Math.PI * (1 - options.spacing + options.spacing * ((pathLength + options.margin + options.randomness * 5 * Math.random()) / (h + options.randomness * 5)));
 		        		} 
 		        		else {
-		        			angle += Math.PI * (1 - spacing + spacing * ((pathLength + margin + randomness * 5 * Math.random()) / (h + randomness * 5)));
+		        			angle += Math.PI * (1 - options.spacing + options.spacing * ((pathLength + options.margin + options.randomness * 5 * Math.random()) / (h + options.randomness * 5)));
 		        		}
 						xDiff = Math.cos(angle);
 						yDiff = -Math.sin(angle);
@@ -96,7 +107,7 @@ window.animate = function() {
 	        var beginDrawing = function() {
 				var ctx = canvas.getContext("2d");
 	  			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
-	  				position = {x: margin, y: margin},
+	  				position = {x: options.margin, y: options.margin},
 	  				frame = 1,
 	  				stepsPerFrame = 0,
 	  				fps = 60;
@@ -106,7 +117,7 @@ window.animate = function() {
 	  			// Get number of movements to break up the animation evenly for the duration
 	  			var path = generatePath(position, []);
 	        	var i = 0,
-	        		stepsPerFrame = path.length / (duration * (fps / 1000));
+	        		stepsPerFrame = path.length / (options.duration * (fps / 1000));
 
 	        	drawing = true;
 	        	var draw = function(timestamp) {
@@ -116,12 +127,12 @@ window.animate = function() {
 		        		}
 		        		else {
 		        			while(i < frame * stepsPerFrame && i < path.length) {
-			        			for (var x = -brushSize; x <= brushSize; x++) {
-									for (var y = -brushSize; y <= brushSize; y++) {
+			        			for (var x = -options.brushSize; x <= options.brushSize; x++) {
+									for (var y = -options.brushSize; y <= options.brushSize; y++) {
 										var yPos = path[i].y + y,
 											xPos = path[i].x + x;
 
-										if(yPos >= 0 && yPos < canvas.height && xPos >= 0 && xPos < canvas.width && Math.sqrt(x*x+y*y) < brushSize) {
+										if(yPos >= 0 && yPos < canvas.height && xPos >= 0 && xPos < canvas.width && Math.sqrt(x*x+y*y) < options.brushSize) {
 											data[(xPos + yPos * canvas.width) * 4 + 3] += brush[x][y];
 										}
 									}
@@ -152,6 +163,31 @@ window.animate = function() {
 	        }
 	    }
 	}, _animate;
+
+	// simple implementation based on $.extend() from jQuery
+	var merge = function() {
+	    var obj, name, copy,
+	        target = arguments[0] || {},
+	        i = 1,
+	        length = arguments.length;
+
+	    for (; i < length; i++) {
+	        if ((obj = arguments[i]) !== null) {
+	            for (name in obj) {
+	                copy = obj[name];
+
+	                if (target === copy) {
+	                    continue;
+	                }
+	                else if (copy !== undefined) {
+	                    target[name] = copy;
+	                }
+	            }
+	        }
+	    }
+
+	    return target;
+	};
 
 	_animate = function(element) {
 		if(typeof element === 'string') {

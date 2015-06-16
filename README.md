@@ -14,7 +14,14 @@
 		var hoverElements = document.querySelectorAll('img.hover_animate');
 
 		for (var i = 0; i < hoverElements.length; ++i) {
-		    var animation = animate(hoverElements[i]).erase(0.5, 10, 24, 0.08, 20, 4000);
+		    var animation = animate(hoverElements[i]).erase({
+				initialOpacity: 0.5,
+				brushSize: 10, 
+				margin: 24,
+				spacing: 1,
+				randomness: 20,
+				duration: 3000
+			});
 		    animation.element.addEventListener( 'mouseover', animation.beginDrawing );
 		    animation.element.addEventListener( 'mouseout', animation.cancelDrawing );	 
 		}
@@ -25,8 +32,10 @@
 ## Animations
 *   `erase`: **An eraser effect painting over the image to make it opaque from being transparent**
   
-        erase(initial opacity, brush radius, margin size, line distance, randomness, duration)
+        erase(options)
 
+    ###Options
+    
 	* initial opacity:  Value from 0-1, where 1 is fully opaque and 0 is transparent
 	* brush radius:     Size of the brush painting on the image
 	* margin size:      How close the brush strokes get to the edge of the image
