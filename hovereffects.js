@@ -24,14 +24,22 @@ window.animate = function() {
 	    	var drawing = false,
 	        	canvas = document.createElement('canvas'),
 				image = new Image(),
-	    		baseImageData;
+				baseImageDataArray,
+	    		imageData;
 
 	        var brush = {}
-			for (var x = -options.brushSize; x <= options.brushSize; x++) {
+			for (var x = 0; x <= options.brushSize * 2; x++) {
 				brush[x] = {};
-				for (var y = -options.brushSize; y <= options.brushSize; y++) {
-					//brush[x][y] = 255 * options.initialOpacity + 255 * (1 - options.initialOpacity) * (1 - Math.sqrt(x*x+y*y) / options.brushSize);
-					brush[x][y] = 255 * (1 - options.initialOpacity) * (Math.sqrt(x*x+y*y) / options.brushSize) * (0.70/options.brushSize);
+				for (var y = 0; y <= options.brushSize * 2; y++) {
+					var r = Math.sqrt((x - options.brushSize) * (x - options.brushSize) +
+						(y - options.brushSize) * (y - options.brushSize));
+
+					if(r < options.brushSize) {
+						//brush[x][y] = 255 * options.initialOpacity + 255 * (1 - options.initialOpacity) * (1 - Math.sqrt(x*x+y*y) / options.brushSize);
+						brush[x][y] = 255 * (1 - options.initialOpacity) * (r / options.brushSize) * (0.70/options.brushSize);
+					} else {
+						brush[x][y] = 0;
+					}
 				}
 			}
 
@@ -41,11 +49,12 @@ window.animate = function() {
 
 				var ctx = canvas.getContext("2d");
 				ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
-	  			baseImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-	  			var data = baseImageData.data;
+	  			imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	  			var data = imageData.data;
 				for (var i = 0; i < data.length; i += 4) {
 					data[i + 3] = options.initialOpacity * 255;
 				}
+				baseImageDataArray = new Uint8ClampedArray(data);
 
 				init();
 	  			imageElement.parentElement.insertBefore(canvas, imageElement);
@@ -54,7 +63,8 @@ window.animate = function() {
 
 	        var init = function() {
 				var ctx = canvas.getContext("2d");
-    			ctx.putImageData(baseImageData, 0, 0);
+				imageData.data.set(baseImageDataArray);
+    			ctx.putImageData(imageData, 0, 0);
 	        }
 
 	        var generatePath = function(position, path) {
@@ -78,10 +88,10 @@ window.animate = function() {
 		        			(position.x + options.margin - Math.random() * options.randomness > canvas.width && xDiff > 0) || 
 		        			(position.y + options.margin - Math.random() * options.randomness > canvas.height && yDiff > 0)) {
 		        		if(angle > 0) {
-		        			angle -= Math.PI * (1 - options.spacing + options.spacing * ((pathLength + options.margin + options.randomness * 5 * Math.random()) / (h + options.randomness * 5)));
+		        			angle -= Math.PI * (1 - options.spacing * spacingMult + options.spacing * spacingMult * ((pathLength + options.margin + options.randomness * 5 * Math.random()) / (h + options.randomness * 5)));
 		        		} 
 		        		else {
-		        			angle += Math.PI * (1 - options.spacing + options.spacing * ((pathLength + options.margin + options.randomness * 5 * Math.random()) / (h + options.randomness * 5)));
+		        			angle += Math.PI * (1 - options.spacing * spacingMult + options.spacing * spacingMult * ((pathLength + options.margin + options.randomness * 5 * Math.random()) / (h + options.randomness * 5)));
 		        		}
 						xDiff = Math.cos(angle);
 						yDiff = -Math.sin(angle);
@@ -106,20 +116,20 @@ window.animate = function() {
 
 	        var beginDrawing = function() {
 				var ctx = canvas.getContext("2d");
-	  			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
-	  				position = {x: options.margin, y: options.margin},
+	  			var position = {x: options.margin, y: options.margin},
 	  				frame = 1,
 	  				stepsPerFrame = 0,
-	  				fps = 60;
+	  				tpf = (60 / 1000);
 
 	  			var data = imageData.data;
 
 	  			// Get number of movements to break up the animation evenly for the duration
 	  			var path = generatePath(position, []);
 	        	var i = 0,
-	        		stepsPerFrame = path.length / (options.duration * (fps / 1000));
+	        		stepsPerFrame = path.length / (options.duration * tpf);
 
 	        	drawing = true;
+
 	        	var draw = function(timestamp) {
 	        		if(drawing) {
 		        		if(i >= path.length) { // position[0] > canvas.width || position[1] > canvas.height
@@ -127,13 +137,15 @@ window.animate = function() {
 		        		}
 		        		else {
 		        			while(i < frame * stepsPerFrame && i < path.length) {
-			        			for (var x = -options.brushSize; x <= options.brushSize; x++) {
-									for (var y = -options.brushSize; y <= options.brushSize; y++) {
-										var yPos = path[i].y + y,
-											xPos = path[i].x + x;
+			        			for (var x = 0; x <= options.brushSize * 2; x++) {
+									for (var y = 0; y <= options.brushSize * 2; y++) {
+										if(brush[x][y]) {
+											var yPos = path[i].y + y - options.brushSize,
+												xPos = path[i].x + x - options.brushSize;
 
-										if(yPos >= 0 && yPos < canvas.height && xPos >= 0 && xPos < canvas.width && Math.sqrt(x*x+y*y) < options.brushSize) {
-											data[(xPos + yPos * canvas.width) * 4 + 3] += brush[x][y];
+											if(yPos >= 0 && yPos < canvas.height && xPos >= 0 && xPos < canvas.width) {
+												data[(xPos + yPos * canvas.width) * 4 + 3] += brush[x][y];
+											}
 										}
 									}
 			        			}
