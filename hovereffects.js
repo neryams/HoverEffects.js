@@ -4,6 +4,7 @@ Licensed under the MIT license - http://opensource.org/licenses/MIT
 Copyright (c) 2015 Raymon Ohmori
 For my beloved, Chloe Lam
 */
+'use strict';
 
 window.animate = function() {
 	var animation_methods = {
@@ -27,7 +28,7 @@ window.animate = function() {
 				baseImageDataArray,
 	    		imageData;
 
-	        var brush = {}
+	        var brush = {};
 			for (var x = 0; x <= options.brushSize * 2; x++) {
 				brush[x] = {};
 				for (var y = 0; y <= options.brushSize * 2; y++) {
@@ -47,7 +48,7 @@ window.animate = function() {
 				canvas.width = imageElement.width;
 				canvas.height = imageElement.height;
 
-				var ctx = canvas.getContext("2d");
+				var ctx = canvas.getContext('2d');
 				ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
 	  			imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	  			var data = imageData.data;
@@ -62,10 +63,10 @@ window.animate = function() {
 	        };
 
 	        var init = function() {
-				var ctx = canvas.getContext("2d");
+				var ctx = canvas.getContext('2d');
 				imageData.data.set(baseImageDataArray);
     			ctx.putImageData(imageData, 0, 0);
-	        }
+	        };
 
 	        var generatePath = function(position, path) {
 	        	var angle = Math.PI / 6,
@@ -112,13 +113,12 @@ window.animate = function() {
 	        		}
 	        	}
 	        	return path;
-	        }
+	        };
 
 	        var beginDrawing = function() {
-				var ctx = canvas.getContext("2d");
+				var ctx = canvas.getContext('2d');
 	  			var position = {x: options.margin, y: options.margin},
 	  				frame = 1,
-	  				stepsPerFrame = 0,
 	  				tpf = (60 / 1000);
 
 	  			var data = imageData.data;
@@ -130,7 +130,7 @@ window.animate = function() {
 
 	        	drawing = true;
 
-	        	var draw = function(timestamp) {
+	        	var draw = function() {
 	        		if(drawing) {
 		        		if(i >= path.length) { // position[0] > canvas.width || position[1] > canvas.height
 		        			drawing = false;
@@ -158,23 +158,23 @@ window.animate = function() {
 		        		}
 	        			window.requestAnimationFrame(draw);
 	        		}
-	        	}
+	        	};
 	        	window.requestAnimationFrame(draw);
-	        }
+	        };
 	        var cancelDrawing = function() {
 	        	drawing = false;
 				init();
-	        }
+	        };
 			
-			image.src = (imageElement.getAttribute ? imageElement.getAttribute("src") : false) || imageElement.src;
+			image.src = (imageElement.getAttribute ? imageElement.getAttribute('src') : false) || imageElement.src;
 
 	        return {
 	        	element: canvas,
 	        	beginDrawing: beginDrawing,
 	        	cancelDrawing: cancelDrawing
-	        }
+	        };
 	    }
-	}, _animate;
+	};
 
 	// simple implementation based on $.extend() from jQuery
 	var merge = function() {
@@ -201,7 +201,7 @@ window.animate = function() {
 	    return target;
 	};
 
-	_animate = function(element) {
+	var Animate = function(element) {
 		if(typeof element === 'string') {
 			this.node = document.querySelector(element);
 		}
@@ -209,10 +209,10 @@ window.animate = function() {
 			this.node = element;
 		}
 	};
-	_animate.prototype = animation_methods;
+	Animate.prototype = animation_methods;
 
 	return function(selector) {
-	    return new _animate(selector);
+	    return new Animate(selector);
 	};
 }();
 
@@ -227,7 +227,7 @@ window.animate = function() {
     }
 
     if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function(callback, element) {
+        window.requestAnimationFrame = function(callback) {
             var currTime = new Date().getTime();
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
             var id = window.setTimeout(function() { callback(currTime + timeToCall); },
